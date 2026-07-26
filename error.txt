@@ -1,3 +1,6 @@
+./gemini.sh: line 12: syntax error near unexpected token `('
+./gemini.sh: line 12: `    PERTANYAAN=\$(dialog --backtitle "KAPTEN NEMO AI" --title " GEMINI AI NATIVE GUI " --inputbox "Masukkan pertanyaan Anda di bawah ini:" 12 65 3>&1 1>&2 2>&3)'
+
 
 ./gemini.sh: line 2: syntax error near unexpected token `<<<'
 ./gemini.sh: line 2: `<<<<<<< HEAD'
