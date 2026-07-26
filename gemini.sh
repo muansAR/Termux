@@ -34,7 +34,14 @@ while true; do
         exit 0
     fi
 
+<<<<<<< HEAD
     # 2. Proses Pengiriman ke Server Proxy Publik Bebas Kunci
+=======
+    # ⚠️ PENTING: BUAT API KEY BARU DI GOOGLE AI STUDIO DAN MASUKKAN DI SINI
+    API_KEY="AQ.Ab8RN6IMstmupi2qCeWFymCcfv1kYLHVN2X35OaehYGwpOZNkw"
+
+    # 2. Proses Pengiriman Request & Animasi Loading Gauge
+>>>>>>> ed2d409 (y)
     (
         echo 20
         # Menyusun objek JSON standar menggunakan JQ
