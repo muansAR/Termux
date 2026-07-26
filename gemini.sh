@@ -2,7 +2,7 @@
 
 # =================================================================
 # Copyright (c) 2026 Kapten Nemo. All rights reserved.
-# Script: Ultra-Lightweight Gemini GUI Dialog for Termux
+# Script: Ultra-Lightweight Gemini GUI Dialog for Termux (FIXED)
 # =================================================================
 
 # Memastikan pustaka dialog visual dan curl terpasang
@@ -33,15 +33,12 @@ while true; do
     # 2. Proses Request dengan Animasi Loading Gauge Visual
     (
         echo 30
-        # GANTI_DENGAN_API_KEY_ANDA -> Silakan ganti teks ini dengan API Key Gemini Anda jika di-edit manual
+        # Masukkan API Key Gemini Anda di bawah ini
         API_KEY="GANTI_DENGAN_API_KEY_ANDA"
         
         echo 60
-        curl -s -X POST "https://googleapis.com" \
-             -H "Content-Type: application/json" \
-             -d "{\"contents\": [{\"parts\":[{\"text\": \"$PERTANYAAN\"}]}]}" \
-
-             | grep -o '"text": "[^"]*' | grep -o '[^"]*$' > "$RESP_FILE"
+        # Baris curl yang sudah diperbaiki menjadi satu baris utuh tanpa pemisah yang merusak token
+        curl -s -X POST "https://googleapis.com" -H "Content-Type: application/json" -d "{\"contents\": [{\"parts\":[{\"text\": \"$PERTANYAAN\"}]}]}" | grep -o '"text": "[^"]*' | grep -o '[^"]*$' > "$RESP_FILE"
         
         echo 100
     ) | dialog --backtitle "KAPTEN NEMO AI" --title " Sedang Memproses... " --gauge "\nMenghubungi server Google Gemini AI..." 8 55 0
