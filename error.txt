@@ -1,2 +1,6 @@
+
+./gemini.sh: line 2: syntax error near unexpected token `<<<'
+./gemini.sh: line 2: `<<<<<<< HEAD'
+
 ./gemini.sh: line 44: syntax error near unexpected token `|'
 ./gemini.sh: line 44: `             | grep -o '"text": "[^"]*' | grep -o '[^"]*$' > "$RESP_FILE"'
