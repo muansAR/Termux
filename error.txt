@@ -7,3 +7,5 @@
 
 ./gemini.sh: line 44: syntax error near unexpected token `|'
 ./gemini.sh: line 44: `             | grep -o '"text": "[^"]*' | grep -o '[^"]*$' > "$RESP_FILE"'
+
+AQ.Ab8RN6IMstmupi2qCeWFymCcfv1kYLHVN2X35OaehYGwpOZNkw
