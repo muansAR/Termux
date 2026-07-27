@@ -123,3 +123,59 @@ if [ -n "$SUBNET" ]; then
 
 fi
 
+# === FITUR LOGIN ROUTER ===
+echo -e "\n${CYAN}=====================================================${RESET}"
+echo -e "${CYAN}              ROUTER LOGIN ASSISTANT                 ${RESET}"
+echo -e "${CYAN}=====================================================${RESET}\n"
+
+read -p "$(echo -e ${YELLOW}'[?] Apakah Anda ingin masuk ke panel router? (y/n): '${RESET})" router_login
+
+if [[ "$router_login" =~ ^[Yy]$ ]]; then
+    # Menggunakan IP Admin yang sudah terdeteksi
+    ROUTER_IP="${IP_ADMIN:-192.168.1.1}"
+    
+    echo -e "\n${BLUE}[*] Masukkan Kredensial Router${RESET}"
+    echo -e "${YELLOW}    IP Router    : $ROUTER_IP${RESET}"
+    
+    read -p "$(echo -e ${YELLOW}'    Username     : '${RESET})" router_user
+    read -sp "$(echo -e ${YELLOW}'    Password     : '${RESET})" router_pass
+    echo ""
+    
+    if [ -z "$router_user" ]; then
+        echo -e "${RED}[X] Username kosong. Dibatalkan.${RESET}"
+        exit 1
+    fi
+    
+    echo -e "\n${BLUE}[*] Mencoba akses ke router...${RESET}"
+    
+    # Coba akses menggunakan curl dengan basic auth
+    RESPONSE=$(curl -s -m 5 --user "$router_user:$router_pass" "http://$ROUTER_IP" -w "\n%{http_code}" 2>/dev/null)
+    HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+    
+    if [ "$HTTP_CODE" = "200" ]; then
+        echo -e "${GREEN}[✓] Login Berhasil!${RESET}"
+        echo -e "${GREEN}    URL: http://$ROUTER_IP${RESET}\n"
+        
+        # Buka browser otomatis jika tersedia
+        if command -v am &> /dev/null; then
+            echo -e "${BLUE}[*] Membuka router di browser...${RESET}"
+            am start -a android.intent.action.VIEW -d "http://$ROUTER_IP" &> /dev/null
+            sleep 2
+        fi
+    elif [ "$HTTP_CODE" = "401" ] || [ "$HTTP_CODE" = "403" ]; then
+        echo -e "${RED}[X] Login Gagal - Username atau Password Salah${RESET}"
+        echo -e "${YELLOW}    [!] Coba kredensial default:${RESET}"
+        echo -e "        • admin / admin"
+        echo -e "        • admin / password"
+        echo -e "        • root / root"
+        echo -e "        • root / 12345"
+    else
+        echo -e "${RED}[X] Tidak dapat terhubung ke router${RESET}"
+        echo -e "${YELLOW}    [!] Pastikan:${RESET}"
+        echo -e "        • IP Router benar: $ROUTER_IP"
+        echo -e "        • Router dapat diakses"
+        echo -e "        • Koneksi Wi-Fi stabil"
+    fi
+else
+    echo -e "${YELLOW}[*] Login router dibatalkan.${RESET}"
+fi
