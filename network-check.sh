@@ -131,8 +131,28 @@ echo -e "${CYAN}=====================================================${RESET}\n"
 read -p "$(echo -e ${YELLOW}'[?] Apakah Anda ingin masuk ke panel router? (y/n): '${RESET})" router_login
 
 if [[ "$router_login" =~ ^[Yy]$ ]]; then
-    # Menggunakan IP Admin yang sudah terdeteksi
-    ROUTER_IP="${IP_ADMIN:-192.168.1.1}"
+    # Jika IP_ADMIN tidak ditemukan, gunakan IP terkecil dari subnet
+    if [ -z "$IP_ADMIN" ]; then
+        echo -e "${YELLOW}[!] IP Router tidak terdeteksi. Mencari IP terkecil di subnet...${RESET}"
+        
+        # Hitung IP terkecil dari subnet (biasanya .1)
+        SMALLEST_IP=$(echo $SUBNET | cut -d. -f1-3)".1"
+        
+        # Verifikasi IP_ADMIN sebelum menggunakannya
+        if ping -c 1 -W 1 "$SMALLEST_IP" &> /dev/null; then
+            IP_ADMIN="$SMALLEST_IP"
+            echo -e "${GREEN}[✓] IP terkecil ditemukan: $IP_ADMIN${RESET}"
+        else
+            echo -e "${RED}[X] IP terkecil ($SMALLEST_IP) tidak dapat dijangkau.${RESET}"
+            read -p "$(echo -e ${YELLOW}'[?] Masukkan IP Router secara manual: '${RESET})" IP_ADMIN
+            if [ -z "$IP_ADMIN" ]; then
+                echo -e "${RED}[X] IP Router kosong. Dibatalkan.${RESET}"
+                exit 1
+            fi
+        fi
+    fi
+    
+    ROUTER_IP="${IP_ADMIN}"
     
     echo -e "\n${BLUE}[*] Masukkan Kredensial Router${RESET}"
     echo -e "${YELLOW}    IP Router    : $ROUTER_IP${RESET}"
