@@ -76,24 +76,50 @@ if [ -n "$SUBNET" ]; then
 
     echo -e "\n${BLUE}[*] Memindai Perangkat di ($SUBNET)...${RESET}\n"
 
-    DNS_OPT=""
-    [ -n "$IP_ADMIN" ] && DNS_OPT="--dns-servers $IP_ADMIN"
-
-    nmap -sn $DNS_OPT "$SUBNET" | awk '
+    # Scan dengan nmap dan reverse DNS lookup
+    nmap -sn -R "$SUBNET" 2>/dev/null | awk '
     /Nmap scan report for/ {
-        if ($0 ~ /\(/) {
-            ip = $NF; gsub(/[\(\)]/, "", ip);
-            sub(/.*Nmap scan report for /, "");
-            sub(/ \(.*/, "");
-            name = $0;
+        ip_with_hostname = $0;
+        sub(/.*Nmap scan report for /, "", ip_with_hostname);
+        
+        # Cek apakah ada hostname dalam kurung
+        if (ip_with_hostname ~ /\(.*\)/) {
+            # Format: hostname (IP)
+            hostname = ip_with_hostname;
+            sub(/ \(.*/, "", hostname);
+            ip = ip_with_hostname;
+            gsub(/.*\(/, "", ip);
+            gsub(/\)/, "", ip);
         } else {
-            ip = $NF;
-            name = "Tidak Terdeteksi";
+            # Hanya IP tanpa hostname
+            ip = ip_with_hostname;
+            hostname = "Unknown";
         }
-        print "    [+] IP: " ip "\n        ↳ Nama Device: " name
+        current_ip = ip;
+        current_hostname = hostname;
+        print "    [+] IP: " ip "\n        ↳ Nama Device: " hostname;
     }
     /MAC Address:/ {
-        sub(/.*MAC Address: /, "");
-        print "        ↳ MAC & Brand: " $0 "\n"
-    }'
+        mac_info = $0;
+        sub(/.*MAC Address: /, "", mac_info);
+        print "        ↳ MAC & Brand: " mac_info "\n"
+    }' &
+
+    # Jika nmap hostname tidak bekerja, gunakan fallback dengan nbtscan
+    if command -v nbtscan &> /dev/null; then
+        sleep 2
+        echo -e "${BLUE}[*] Mencoba NBT Scan untuk nama device tambahan...${RESET}\n"
+        nbtscan -r "$SUBNET" 2>/dev/null | grep -v "Sendto failed" | tail -n +5 | while read line; do
+            if [ -n "$line" ]; then
+                name=$(echo "$line" | awk '{print $2}' | grep -v "^$")
+                if [ -n "$name" ] && [ "$name" != "<UNKNOWN>" ]; then
+                    echo "        [+] Nama Alternatif Terdeteksi: $name"
+                fi
+            fi
+        done
+    fi
+    
+    wait
+
 fi
+
